@@ -10,19 +10,12 @@ This is to ensure our use of Formstack is GDPR compliant.
 
 ### Setup
 
-The following parameters must be created in [parameter store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html):
-- `formstack/account-1/account-id`
-- `formstack/account-1/access-token`
-- `formstack/account-1/encryption-password`
-- `formstack/account-2/account-id`
-- `formstack/account-2/access-token`
-- `formstack/account-2/encryption-password`
-
-The rest of the resources can then be created using `template.yaml`.
+Use `template.yaml` to create the stacks for the two Formstack accounts (respectively).
 
 ### Alarms
 
-An alarm is triggered if any `ERROR`s are logged.
+An alarm is triggered if a lambda fails 3 times in a day i.e. it failed on its scheduled invocation and on both the
+retry attempts.
 
 ## Local development
 
