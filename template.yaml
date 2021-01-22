@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Create resources to delete old Formstack forms and submissions on a daily basis, in compliance with GDPR.
+Parameters:
+  CodeUri:
+    Default: TODO whatever it will be when deployed by RiffRaff
+    Description: >
+      Uri of lambda jar created by sbt assembly.
+      By setting this as a parameter, the SAM CLI can be used to invoke the lambda locally,
+      overriding the CodeUri to point to a local artifact.
+    Type: String
+  FormstackAccountRef:
+    Description: Reference for the Formstack account.
+    Type: String
+  FormstackAccountId:
+    Description: Id of the Formstack account.
+    Type: String
+  FormstackAccessToken:
+    Description: Used to authenticate against the Formstack API.
+    Type: String
+  FormstackEncryptionPassword:
+    Description: Used to decrypt Formstack submissions.
+    Type: String
+Resources:
+  FormstackFormDeletionLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: !Ref CodeUri
+      Description: Lambda to delete old Formstack forms
+      Environment:
+        Variables:
+          FormstackAccountId: !Ref FormstackAccountId
+          FormstackAccessToken: !Ref FormstackAccessToken
+          FormstackEncryptionPassword: !Ref FormstackEncryptionPassword
+          IsDryRun: true
+          LogLevel: INFO
+      Events:
+        DailyInvocation:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 10 * * ? *)
+      FunctionName: !Sub formstack-form-deletion-lambda-${FormstackAccountRef}-PROD
+      Handler: com.gu.formstack.handlers.FormstackFormDeletionHandler::handleRequest
+      MemorySize: 256
+      Runtime: java11
+      Timeout: 900
+  FormstackSubmissionDeletionLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: !Ref CodeUri
+      Description: Lambda to delete old Formstack submissions
+      Environment:
+        Variables:
+          FORMSTACK_ACCOUNT_ID: !Ref FormstackAccountId
+          FORMSTACK_ACCESS_TOKEN: !Ref FormstackAccessToken
+          FORMSTACK_ENCRYPTION_PASSWORD: !Ref FormstackEncryptionPassword
+          IS_DRY_RUN: true
+          LOG_LEVEL: INFO
+      # We want to invoke the lambda(s) for deleting forms submissions after the lambda(s) for deleting forms,
+      # since this will save on API requests to get and delete submissions.
+      Events:
+        DailyInvocation:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 11 * * ? *)
+      FunctionName: !Sub formstack-submission-deletion-lambda-${FormstackAccountRef}-PROD
+      Handler: com.gu.formstack.handlers.FormstackSubmissionDeletionHandler::handleRequest
+      MemorySize: 256
+      Runtime: java11
+      Timeout: 900

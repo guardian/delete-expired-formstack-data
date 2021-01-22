@@ -1,0 +1,40 @@
+regions:
+  - eu-west-1
+stacks:
+  - flexible # TODO: check
+
+templates:
+  formstack-cloud-formation-template:
+    type: cloud-formation
+    parameters:
+      appendStageToCloudFormationStackName: false
+      cloudFormationStackByTags: false
+      prependStackToCloudFormationStackName: false
+
+deployments:
+
+  cloudformation-account-1:
+    template: formstack-cloud-formation-template
+    parameters:
+      cloudFormationStackName: delete-expired-formstack-data-account-1
+      templateParameters:
+        AccountRef: account-1
+
+  cloudformation-account-2:
+    template: formstack-cloud-formation-template
+    parameters:
+      cloudFormationStackName: delete-expired-formstack-data-account-2
+      templateParameters:
+        AccountRef: account-2
+
+  formstack-lambdas:
+    type: aws-lambda
+    parameters:
+      functionNames:
+        - formstack-form-deletion-lambda-account-1-
+        - formstack-form-deletion-lambda-account-2-
+        - formstack-submission-deletion-lambda-account-1-
+        - formstack-submission-deletion-lambda-account-2-
+    dependencies:
+      - cloudformation-account-1
+      - cloudformation-account-2

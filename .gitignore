@@ -1,0 +1,7 @@
+.aws-sam
+.bsp
+.idea
+project/project
+project/target
+target
+Brewfile.lock.json
