@@ -18,3 +18,4 @@ riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Some("riffraff-artifact")
 riffRaffUploadManifestBucket := Some("riffraff-builds")
 riffRaffManifestProjectName := s"Content Platforms::${name.value}"
+riffRaffArtifactResources += (baseDirectory.value / "template.yaml" -> "cloudformation/template.yaml")
