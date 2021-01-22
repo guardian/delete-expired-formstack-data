@@ -21,6 +21,9 @@ Parameters:
   FormstackEncryptionPassword:
     Description: Used to decrypt Formstack submissions.
     Type: String
+  AlarmTopic:
+    Description: ARN of SNS topic to send messages to when a Formstack alarm transitions to the Alarm state.
+    Type: String
 Resources:
   FormstackFormDeletionLambda:
     Type: AWS::Serverless::Function
@@ -68,3 +71,89 @@ Resources:
       MemorySize: 256
       Runtime: java11
       Timeout: 900
+  FormstackFormDeletionLambdaAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmActions:
+        - !Ref AlarmTopic
+      AlarmDescription: Alarm if all lambda invocations within the day fail, or if there are no invocations.
+      AlarmName: !Sub formstack-form-deletion-lambda-alarm-${FormstackAccountRef}
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Metrics:
+        - Id: invocations
+          Label: Lambda invocations
+          MetricStat:
+            Metric:
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref FormstackFormDeletionLambda
+              MetricName: Invocations
+              Namespace: AWS/Lambda
+            Period: 86400
+            Stat: Sum
+            Unit: Count
+          ReturnData: False
+        - Id: errors
+          Label: Lambda errors
+          MetricStat:
+            Metric:
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref FormstackFormDeletionLambda
+              MetricName: Errors
+              Namespace: AWS/Lambda
+            Period: 86400
+            Stat: Sum
+            Unit: Count
+          ReturnData: False
+        - Expression: errors / invocations
+          Id: error_rate
+          Label: Lambda error rate
+          ReturnData: True
+      Threshold: 1
+      # Treat missing data as breaching so the alarm will trigger if the lambda isn't invoked for a given day.
+      TreatMissingData: breaching
+  FormstackSubmissionDeletionLambdaAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmActions:
+        - !Ref AlarmTopic
+      AlarmDescription: Alarm if all lambda invocations within the day fail, or if there are no invocations.
+      AlarmName: !Sub formstack-submission-deletion-lambda-alarm-${FormstackAccountRef}
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Metrics:
+        - Id: invocations
+          Label: Lambda invocations
+          MetricStat:
+            Metric:
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref FormstackSubmissionDeletionLambda
+              MetricName: Invocations
+              Namespace: AWS/Lambda
+            Period: 86400
+            Stat: Sum
+            Unit: Count
+          ReturnData: False
+        - Id: errors
+          Label: Lambda errors
+          MetricStat:
+            Metric:
+              Dimensions:
+                - Name: FunctionName
+                  Value: !Ref FormstackSubmissionDeletionLambda
+              MetricName: Errors
+              Namespace: AWS/Lambda
+            Period: 86400
+            Stat: Sum
+            Unit: Count
+          ReturnData: False
+        - Expression: errors / invocations
+          Id: error_rate
+          Label: Lambda error rate
+          ReturnData: True
+      Threshold: 1
+      # Treat missing data as breaching so the alarm will trigger if the lambda isn't invoked for a given day.
+      TreatMissingData: breaching
