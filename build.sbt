@@ -10,8 +10,11 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.1"
 )
 
+enablePlugins(AssemblyPlugin, RiffRaffArtifact)
+
 assemblyJarName in assembly := s"${name.value}.jar"
 
+riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Some("riffraff-artifact")
 riffRaffUploadManifestBucket := Some("riffraff-builds")
 riffRaffManifestProjectName := s"Content Platforms::${name.value}"
