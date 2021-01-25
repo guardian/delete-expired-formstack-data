@@ -6,7 +6,6 @@ Parameters:
     Description: Lambda stage. Should typically be PROD since we don't have a CODE Formstack environment.
     Type: String
   CodeUri:
-    Default: TODO whatever it will be when deployed by RiffRaff
     Description: >
       Uri of lambda jar created by sbt assembly.
       By setting this as a parameter, the SAM CLI can be used to invoke the lambda locally,
