@@ -3,8 +3,10 @@ Transform: AWS::Serverless-2016-10-31
 Description: Create resources to delete old Formstack forms and submissions on a daily basis, in compliance with GDPR.
 Parameters:
   Stage:
-    Description: Lambda stage. Should typically be PROD since we don't have a CODE Formstack environment.
+    Description: Lambda stage.
     Type: String
+    AllowedValues:
+      - PROD # only PROD currently supported since there isn't a CODE Formstack environment
   FormstackAccountRef:
     Description: Reference for the Formstack account.
     Type: String
