@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
 
 enablePlugins(AssemblyPlugin, RiffRaffArtifact)
 
-assemblyJarName in assembly := s"${name.value}.jar"
+assemblyJarName in assembly := s"app.jar"
 
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Some("riffraff-artifact")
