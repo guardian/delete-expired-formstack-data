@@ -2,13 +2,11 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: Create resources to delete old Formstack forms and submissions on a daily basis, in compliance with GDPR.
 Parameters:
-  CodeUri:
-    Default: TODO whatever it will be when deployed by RiffRaff
-    Description: >
-      Uri of lambda jar created by sbt assembly.
-      By setting this as a parameter, the SAM CLI can be used to invoke the lambda locally,
-      overriding the CodeUri to point to a local artifact.
+  Stage:
+    Description: Lambda stage.
     Type: String
+    AllowedValues:
+      - PROD # only PROD currently supported since there isn't a CODE Formstack environment
   FormstackAccountRef:
     Description: Reference for the Formstack account.
     Type: String
@@ -28,7 +26,9 @@ Resources:
   FormstackFormDeletionLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: !Ref CodeUri
+      CodeUri:
+        Bucket: delete-expired-formstack-data-dist
+        Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack forms
       Environment:
         Variables:
@@ -50,7 +50,9 @@ Resources:
   FormstackSubmissionDeletionLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: !Ref CodeUri
+      CodeUri:
+        Bucket: delete-expired-formstack-data-dist
+        Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack submissions
       Environment:
         Variables:

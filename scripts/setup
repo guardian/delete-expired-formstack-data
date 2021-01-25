@@ -16,9 +16,14 @@ set_java_home() {
   export JAVA_HOME=$java_11_home
 }
 
+build_local_code_uri() {
+  docker build -t local-code-uri scripts/local-code-uri
+}
+
 main() {
   install_requirements
   set_java_home
+  build_local_code_uri
 }
 
 main

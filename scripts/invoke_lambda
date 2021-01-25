@@ -2,6 +2,8 @@
 
 set -e
 
+root_dir="$( cd "$(dirname "$0")" || exit; pwd -P )"
+
 function show_help {
 cat << EOF
 Usage: invoke_lambda [OPTIONS] [LAMBDA_NAMES]
@@ -123,7 +125,6 @@ else
 fi
 
 env_var_file="$(mktemp)"
-trap 'rm -f "$env_var_file"' 0 2 3 15
 cat << EOF >> "$env_var_file"
 {
   "Parameters": {
@@ -138,7 +139,11 @@ account_id_param="ParameterKey=FormstackAccountId,ParameterValue=$account_id"
 access_token_param="ParameterKey=FormstackAccessToken,ParameterValue=$access_token"
 password_param="ParameterKey=FormstackEncryptionPassword,ParameterValue=$password"
 
+template_file="$(mktemp)"
+docker run --mount type=bind,source="$root_dir/template.yaml",target=/usr/local/bin/template.yaml local-code-uri > "$template_file"
+
 sam local invoke "$lambda_name" \
+  --template-file "$template_file" \
   --env-vars "$env_var_file" \
   --parameter-overrides "$code_uri_param $account_id_param $access_token_param $password_param" \
   $debugger_option
