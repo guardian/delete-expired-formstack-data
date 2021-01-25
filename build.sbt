@@ -1,4 +1,4 @@
-name := "delete-expired-formstack-data"
+name := "delete-expired-formstack-data-lambdas"
 
 version := "0.1"
 

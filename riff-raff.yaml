@@ -27,7 +27,7 @@ deployments:
       templateParameters:
         FormstackAccountRef: account-2
 
-  formstack-lambdas:
+  delete-expired-formstack-data-lambdas:
     type: aws-lambda
     parameters:
       bucket: delete-expired-formstack-data-dist
