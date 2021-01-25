@@ -18,14 +18,14 @@ deployments:
     parameters:
       cloudFormationStackName: delete-expired-formstack-data-account-1
       templateParameters:
-        AccountRef: account-1
+        FormstackAccountRef: account-1
 
   cloudformation-account-2:
     template: formstack-cloud-formation-template
     parameters:
       cloudFormationStackName: delete-expired-formstack-data-account-2
       templateParameters:
-        AccountRef: account-2
+        FormstackAccountRef: account-2
 
   formstack-lambdas:
     type: aws-lambda

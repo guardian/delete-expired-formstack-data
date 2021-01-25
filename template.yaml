@@ -2,6 +2,9 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: Create resources to delete old Formstack forms and submissions on a daily basis, in compliance with GDPR.
 Parameters:
+  Stage:
+    Description: Lambda stage. Should typically be PROD since we don't have a CODE Formstack environment.
+    Type: String
   CodeUri:
     Default: TODO whatever it will be when deployed by RiffRaff
     Description: >
@@ -39,7 +42,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: cron(0 10 * * ? *)
-      FunctionName: !Sub formstack-form-deletion-lambda-${FormstackAccountRef}-PROD
+      FunctionName: !Sub formstack-form-deletion-lambda-${FormstackAccountRef}-${Stage}
       Handler: com.gu.formstack.handlers.FormstackFormDeletionHandler::handleRequest
       MemorySize: 256
       Runtime: java11
