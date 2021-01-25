@@ -37,6 +37,8 @@ deployments:
         - formstack-form-deletion-lambda-account-2-
         - formstack-submission-deletion-lambda-account-1-
         - formstack-submission-deletion-lambda-account-2-
+      prefixStack: false
+      prefixStackToKey: false
     dependencies:
       - cloudformation-account-1
       - cloudformation-account-2
