@@ -10,6 +10,9 @@ Parameters:
   FormstackAccountRef:
     Description: Reference for the Formstack account.
     Type: String
+    AllowedValues:
+      - account-1
+      - account-2
   FormstackAccountId:
     Description: Id of the Formstack account.
     Type: String
@@ -42,7 +45,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: cron(0 10 * * ? *)
-      FunctionName: !Sub formstack-form-deletion-lambda-${FormstackAccountRef}-PROD
+      FunctionName: !Sub formstack-form-deletion-lambda-${FormstackAccountRef}-${Stage}
       Handler: com.gu.formstack.handlers.FormstackFormDeletionHandler::handleRequest
       MemorySize: 256
       Runtime: java11

@@ -7,9 +7,9 @@ templates:
   formstack-cloud-formation-template:
     type: cloud-formation
     parameters:
-      appendStageToCloudFormationStackName: false
       cloudFormationStackByTags: false
       prependStackToCloudFormationStackName: false
+      templatePath: template.yaml
 
 deployments:
 
@@ -18,23 +18,27 @@ deployments:
     parameters:
       cloudFormationStackName: delete-expired-formstack-data-account-1
       templateParameters:
-        AccountRef: account-1
+        FormstackAccountRef: account-1
 
   cloudformation-account-2:
     template: formstack-cloud-formation-template
     parameters:
       cloudFormationStackName: delete-expired-formstack-data-account-2
       templateParameters:
-        AccountRef: account-2
+        FormstackAccountRef: account-2
 
-  formstack-lambdas:
+  delete-expired-formstack-data-lambdas:
     type: aws-lambda
     parameters:
+      bucket: delete-expired-formstack-data-dist
+      fileName: app.jar
       functionNames:
         - formstack-form-deletion-lambda-account-1-
         - formstack-form-deletion-lambda-account-2-
         - formstack-submission-deletion-lambda-account-1-
         - formstack-submission-deletion-lambda-account-2-
+      prefixStack: false
+      prefixStackToKey: false
     dependencies:
       - cloudformation-account-1
       - cloudformation-account-2
