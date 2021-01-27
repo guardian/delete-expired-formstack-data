@@ -59,7 +59,7 @@ Resources:
                   "formstackEncryptionPassword": "${FormstackEncryptionPasswordAccount2}"
                 }
               Schedule: cron(0 10 * * ? *)
-      FunctionName: !Sub formstack-form-deletion-lambda-${FormstackAccountRef}-${Stage}
+      FunctionName: !Sub formstack-form-deletion-lambda-${Stage}
       Handler: com.gu.formstack.handlers.FormstackFormDeletionHandler::handleRequest
       MemorySize: 256
       Runtime: java11
@@ -71,7 +71,7 @@ Resources:
         Bucket: delete-expired-formstack-data-dist
         Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack submissions
-      # We want to invoke the lambda(s) for deleting forms submissions after the lambda(s) for deleting forms,
+      # We want to invoke the lambda for deleting forms submissions after the lambda for deleting forms,
       # since this will save on API requests to get and delete submissions.
       Events:
         DailyInvocationAccount1:
@@ -96,20 +96,25 @@ Resources:
                   "formstackEncryptionPassword": "${FormstackEncryptionPasswordAccount2}"
                 }
               Schedule: cron(0 11 * * ? *)
-      FunctionName: !Sub formstack-submission-deletion-lambda-${FormstackAccountRef}-PROD
+      FunctionName: !Sub formstack-submission-deletion-lambda-${Stage}
       Handler: com.gu.formstack.handlers.FormstackSubmissionDeletionHandler::handleRequest
       MemorySize: 256
       Runtime: java11
       Timeout: 900
+  # All we require is for the lambda for each account to be successfully invoked at least once per day (possibly after retries).
+  # Since it can be invoked successfully at most once per day, this requirement will NOT be met
+  # (i.e. we should trigger the alarm) if and only if there are < 2 successful invocations per day.
   FormstackFormDeletionLambdaAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmActions:
         - !Ref AlarmTopic
-      AlarmDescription: Alarm if all lambda invocations within the day fail, or if there are no invocations.
+      AlarmDescription: Alarm if expired forms haven't been successfully deleted for both Formstack accounts.
       AlarmName: !Sub formstack-form-deletion-lambda-alarm-${FormstackAccountRef}
-      ComparisonOperator: GreaterThanOrEqualToThreshold
+      ComparisonOperator: LessThanThreshold
       EvaluationPeriods: 1
+      # Have to use a MetricDataQuery since successes isn't a predefined metric.
+      # Alternatively could use a MetricFilter or a custom metric, but this is brittle / adds complexity (respectively).
       Metrics:
         - Id: invocations
           Label: Lambda invocations
@@ -137,19 +142,20 @@ Resources:
             Stat: Sum
             Unit: Count
           ReturnData: False
-        - Expression: errors / invocations
-          Id: error_rate
-          Label: Lambda error rate
+        - Expression: invocations - errors
+          Id: successes
+          Label: Lambda successes
           ReturnData: True
-      Threshold: 1
+      Threshold: 2
       # Treat missing data as breaching so the alarm will trigger if the lambda isn't invoked for a given day.
       TreatMissingData: breaching
+  # All comments for FormstackFormDeletionLambdaAlarm are also applicable for this alarm.
   FormstackSubmissionDeletionLambdaAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmActions:
         - !Ref AlarmTopic
-      AlarmDescription: Alarm if all lambda invocations within the day fail, or if there are no invocations.
+      AlarmDescription: Alarm if expired submissions haven't been successfully deleted for both Formstack accounts.
       AlarmName: !Sub formstack-submission-deletion-lambda-alarm-${FormstackAccountRef}
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
@@ -180,10 +186,9 @@ Resources:
             Stat: Sum
             Unit: Count
           ReturnData: False
-        - Expression: errors / invocations
-          Id: error_rate
-          Label: Lambda error rate
+        - Expression: invocations - errors
+          Id: successes
+          Label: Lambda successes
           ReturnData: True
-      Threshold: 1
-      # Treat missing data as breaching so the alarm will trigger if the lambda isn't invoked for a given day.
+      Threshold: 2
       TreatMissingData: breaching

@@ -6,17 +6,6 @@ This repo provides lambdas which are used for (respectively):
 
 This is to ensure our use of Formstack is GDPR compliant.
 
-## Production
-
-### Setup
-
-Use `template.yaml` to create the stacks for the two Formstack accounts (respectively).
-
-### Alarms
-
-An alarm is triggered if a lambda fails 3 times in a day i.e. it failed on its scheduled invocation and on both the
-retry attempts.
-
 ## Local development
 
 ### Setup
