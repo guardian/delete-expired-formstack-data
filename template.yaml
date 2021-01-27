@@ -10,6 +10,9 @@ Parameters:
   FormstackAccountRef:
     Description: Reference for the Formstack account.
     Type: String
+    AllowedValues:
+      - account-1
+      - account-2
   FormstackAccountId:
     Description: Id of the Formstack account.
     Type: String

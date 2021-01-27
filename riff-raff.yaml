@@ -9,7 +9,6 @@ templates:
     parameters:
       appendStageToCloudFormationStackName: false
       cloudFormationStackByTags: false
-      prependStackToCloudFormationStackName: false
 
 deployments:
 
