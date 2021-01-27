@@ -9,7 +9,7 @@ templates:
     parameters:
       cloudFormationStackByTags: false
       prependStackToCloudFormationStackName: false
-      templatePath: cloudformation/template.yaml
+      templatePath: template.yaml
 
 deployments:
 

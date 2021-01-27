@@ -18,4 +18,8 @@ riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Some("riffraff-artifact")
 riffRaffUploadManifestBucket := Some("riffraff-builds")
 riffRaffManifestProjectName := s"Content Platforms::${name.value}"
-riffRaffArtifactResources += (baseDirectory.value / "template.yaml" -> "cloudformation/template.yaml")
+riffRaffArtifactResources ++= Seq(
+  // TODO: comment on why it is necessary to duplicate the template.yaml file
+  (baseDirectory.value / "template.yaml" -> "cloudformation-account-1/template.yaml"),
+  (baseDirectory.value / "template.yaml" -> "cloudformation-account-2/template.yaml")
+)
