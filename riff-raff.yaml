@@ -8,6 +8,7 @@ templates:
     type: cloud-formation
     parameters:
       cloudFormationStackByTags: false
+      prependStackToCloudFormationStackName: false
 
 deployments:
 
