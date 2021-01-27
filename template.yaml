@@ -7,20 +7,23 @@ Parameters:
     Type: String
     AllowedValues:
       - PROD # only PROD currently supported since there isn't a CODE Formstack environment
-  FormstackAccountRef:
-    Description: Reference for the Formstack account.
+  FormstackAccountIdAccount1:
+    Description: Id of the first Formstack account.
     Type: String
-    AllowedValues:
-      - account-1
-      - account-2
-  FormstackAccountId:
-    Description: Id of the Formstack account.
+  FormstackAccessTokenAccount1:
+    Description: Used to authenticate against the Formstack API for account one.
     Type: String
-  FormstackAccessToken:
-    Description: Used to authenticate against the Formstack API.
+  FormstackEncryptionPasswordAccount1:
+    Description: Used to decrypt Formstack submissions for account 1.
     Type: String
-  FormstackEncryptionPassword:
-    Description: Used to decrypt Formstack submissions.
+  FormstackAccountIdAccount2:
+    Description: Id of the second Formstack account.
+    Type: String
+  FormstackAccessTokenAccount2:
+    Description: Used to authenticate against the Formstack API for account 2.
+    Type: String
+  FormstackEncryptionPasswordAccount2:
+    Description: Used to decrypt Formstack submissions for account 2.
     Type: String
   AlarmTopic:
     Description: ARN of SNS topic to send messages to when a Formstack alarm transitions to the Alarm state.
@@ -33,18 +36,29 @@ Resources:
         Bucket: delete-expired-formstack-data-dist
         Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack forms
-      Environment:
-        Variables:
-          FormstackAccountId: !Ref FormstackAccountId
-          FormstackAccessToken: !Ref FormstackAccessToken
-          FormstackEncryptionPassword: !Ref FormstackEncryptionPassword
-          IsDryRun: true
-          LogLevel: INFO
       Events:
-        DailyInvocation:
+        DailyInvocationAccount1:
           Type: Schedule
           Properties:
+            Description: Invoke the lambda to delete expired Formstack forms for account 1 daily at 10am.
+            Input: !Sub >
+              {
+                "formstackAccountId": "${FormstackAccountIdAccount1}",
+                "formstackAccessToken": "${FormstackAccessTokenAccount1}",
+                "formstackEncryptionPassword": "${FormstackEncryptionPasswordAccount1}"
+              }
             Schedule: cron(0 10 * * ? *)
+        DailyInvocationAccount2:
+          Type: Schedule
+            Properties:
+              Description: Invoke the lambda to delete expired Formstack forms for account 2 daily at 10am.
+              Input: !Sub >
+                {
+                  "formstackAccountId": "${FormstackAccountIdAccount2}",
+                  "formstackAccessToken": "${FormstackAccessTokenAccount2}",
+                  "formstackEncryptionPassword": "${FormstackEncryptionPasswordAccount2}"
+                }
+              Schedule: cron(0 10 * * ? *)
       FunctionName: !Sub formstack-form-deletion-lambda-${FormstackAccountRef}-${Stage}
       Handler: com.gu.formstack.handlers.FormstackFormDeletionHandler::handleRequest
       MemorySize: 256
@@ -57,20 +71,31 @@ Resources:
         Bucket: delete-expired-formstack-data-dist
         Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack submissions
-      Environment:
-        Variables:
-          FORMSTACK_ACCOUNT_ID: !Ref FormstackAccountId
-          FORMSTACK_ACCESS_TOKEN: !Ref FormstackAccessToken
-          FORMSTACK_ENCRYPTION_PASSWORD: !Ref FormstackEncryptionPassword
-          IS_DRY_RUN: true
-          LOG_LEVEL: INFO
       # We want to invoke the lambda(s) for deleting forms submissions after the lambda(s) for deleting forms,
       # since this will save on API requests to get and delete submissions.
       Events:
-        DailyInvocation:
+        DailyInvocationAccount1:
           Type: Schedule
           Properties:
+            Description: Invoke the lambda to delete expired Formstack submissions for account 1 daily at 11am.
+            Input: !Sub >
+              {
+                "formstackAccountId": "${FormstackAccountIdAccount1}",
+                "formstackAccessToken": "${FormstackAccessTokenAccount1}",
+                "formstackEncryptionPassword": "${FormstackEncryptionPasswordAccount1}"
+              }
             Schedule: cron(0 11 * * ? *)
+        DailyInvocationAccount2:
+          Type: Schedule
+            Properties:
+              Description: Invoke the lambda to delete expired Formstack submissions for account 2 daily at 11am.
+              Input: !Sub >
+                {
+                  "formstackAccountId": "${FormstackAccountIdAccount2}",
+                  "formstackAccessToken": "${FormstackAccessTokenAccount2}",
+                  "formstackEncryptionPassword": "${FormstackEncryptionPasswordAccount2}"
+                }
+              Schedule: cron(0 11 * * ? *)
       FunctionName: !Sub formstack-submission-deletion-lambda-${FormstackAccountRef}-PROD
       Handler: com.gu.formstack.handlers.FormstackSubmissionDeletionHandler::handleRequest
       MemorySize: 256
