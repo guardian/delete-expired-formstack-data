@@ -1,12 +1,23 @@
 package com.gu.formstack.handlers
 
 import com.amazonaws.services.lambda.runtime.{ Context, RequestStreamHandler }
+import com.gu.formstack.Logging
 
 import java.io.{ InputStream, OutputStream }
 
-object FormstackFormDeletionHandler extends RequestStreamHandler {
+object FormstackFormDeletionHandler extends RequestStreamHandler with Logging {
 
   override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
-    println("executing updated lambda")
+    println("executing lambda")
+//    (for {
+//      config <- Config.fromEnvironmentVariables()
+//      _ = logger.info(show"executing form deletions with config ${config.hideSecrets}")
+//      _ <- Logging.configureLogging(config, context)
+//      formDeleter = FormstackFormDeleter.fromConfig(config)
+//      _ <- formDeleter.deleteExpiredForms()
+//    } yield ()).fold(
+//      err => logger.error("error in form deletion process", err),
+//      _ => ()
+//    )
   }
 }

@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+
+set -e
+
+function show_help {
+cat << EOF
+Usage: invoke_lambda [OPTIONS] [LAMBDA_NAMES]
+
+  You can use this command to execute a lambda locally.
+
+  To prevent you from having to provide the Formstack credentials per execution
+  $ export FORMSTACK_ACCOUNT_ID=''
+  $ export FORMSTACK_ACCESS_TOKEN=''
+  $ export FORMSTACK_ENCRYPTION_PASSWORD=''
+  (the other examples assume this).
+
+  To inspect the credentials that have been set
+  $ ./check_credentials
+
+  Build the artifact before executing the lambda
+  $ ./invoke_lambda -b FormstackFormDeletionLambda
+
+  Debug an issue by setting log level to DEBUG and starting a debugger to connect to
+  e.g. in IntelliJ you would create a process to attach to a remote JVM on port 5858.
+  $ ./invoke_lambda -l DEBUG -d FormstackFormDeletionLambda
+
+  Execute a lambda in non-dry mode i.e. DELETE requests will be executed
+  $ ./invoke_lambda -n FormstackSubmissionDeletionLambda
+
+Options:
+  -b       When specified, the lambda artifact is built before invoking the lambda. Requires sbt to use java11.
+  -i  TEXT Formstack account id. If not set, FORMSTACK_ACCOUNT_ID must be exported by the parent process.
+  -t  TEXT Formstack access token. If not set, FORMSTACK_ACCESS_TOKEN must be exported by the parent process.
+  -p  TEXT Formstack encryption password. If not set, FORMSTACK_ENCRYPTION_PASSWORD must be exported by the parent process.
+  -n       When specified, the lambda will be invoked as a non-dry run i.e. DELETE requests will be executed.
+  -l  TEXT Used to override the log level of the invoked lambda.
+  -d       When specified, debugger is started on port 5858. Lambda will not start until a process connects to this port.
+EOF
+}
+
+build=false
+dry_run=true
+log_level=INFO
+start_debugger=false
+
+while getopts ":bi:t:p:nl:dh:" o; do
+  case "${o}" in
+    b)
+      build=true
+      ;;
+    i)
+      account_id=${OPTARG}
+      ;;
+    t)
+      access_token=${OPTARG}
+      ;;
+    p)
+      password=${OPTARG}
+      ;;
+    n)
+      dry_run=false
+      ;;
+    l)
+      log_level=${OPTARG}
+      ;;
+    d)
+      start_debugger=true
+      ;;
+    h)
+      show_help
+      exit 0
+      ;;
+    *)
+      show_help
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+lambda_name="$1"
+
+if [ -z "${account_id}" ]; then
+  if [ -z "$FORMSTACK_ACCOUNT_ID" ]; then
+    echo "FORMSTACK_ACCOUNT_ID not set"
+    show_help
+    exit 1
+  else
+    account_id=$FORMSTACK_ACCOUNT_ID
+  fi
+fi
+
+if [ -z "${access_token}" ]; then
+  if [ -z "$FORMSTACK_ACCESS_TOKEN" ]; then
+    echo "FORMSTACK_ACCESS_TOKEN not set"
+    show_help
+    exit 1
+  else
+    access_token=$FORMSTACK_ACCESS_TOKEN
+  fi
+fi
+
+if [ -z "${password}" ]; then
+  if [ -z "$FORMSTACK_ENCRYPTION_PASSWORD" ]; then
+    echo "FORMSTACK_ENCRYPTION_PASSWORD not set"
+    show_help
+    exit 1
+  else
+    password=$FORMSTACK_ENCRYPTION_PASSWORD
+  fi
+fi
+
+if [ "${build}" = true ]; then
+  echo "Building lambda artifact..."
+  sbt assembly
+fi
+
+if [ "${start_debugger}" == true ]; then
+  echo "Lambda running in debug mode; please connect to port 5858"
+  debugger_option="--debug-port 5858"
+else
+  debugger_option=""
+fi
+
+env_var_file="$(mktemp)"
+trap 'rm -f "$env_var_file"' 0 2 3 15
+cat << EOF >> "$env_var_file"
+{
+  "Parameters": {
+    "IS_DRY_RUN": $dry_run,
+    "LOG_LEVEL": "$log_level"
+  }
+}
+EOF
+
+code_uri_param='ParameterKey=CodeUri,ParameterValue=target/scala-2.13/delete-expired-formstack-data-assembly-0.1.jar'
+account_id_param="ParameterKey=FormstackAccountId,ParameterValue=$account_id"
+access_token_param="ParameterKey=FormstackAccessToken,ParameterValue=$access_token"
+password_param="ParameterKey=FormstackEncryptionPassword,ParameterValue=$password"
+
+sam local invoke "$lambda_name" \
+  --env-vars "$env_var_file" \
+  --parameter-overrides "$code_uri_param $account_id_param $access_token_param $password_param" \
+  $debugger_option
