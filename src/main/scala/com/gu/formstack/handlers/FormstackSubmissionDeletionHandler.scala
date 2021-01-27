@@ -7,6 +7,6 @@ import java.io.{ InputStream, OutputStream }
 object FormstackSubmissionDeletionHandler extends RequestStreamHandler {
 
   override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
-    println("executing lambda")
+    println("executing updated lambda")
   }
 }
