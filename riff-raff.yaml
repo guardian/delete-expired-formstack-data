@@ -7,7 +7,6 @@ templates:
   formstack-cloud-formation-template:
     type: cloud-formation
     parameters:
-      appendStageToCloudFormationStackName: false
       cloudFormationStackByTags: false
 
 deployments:
