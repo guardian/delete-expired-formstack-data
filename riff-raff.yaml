@@ -8,7 +8,7 @@ deployments:
     type: cloud-formation
     parameters:
       cloudFormationStackByTags: false
-      cloudFormationStackName: delete-expired-formstack-data-account-1
+      cloudFormationStackName: delete-expired-formstack-data
       prependStackToCloudFormationStackName: false
       templatePath: template.yaml
   delete-expired-formstack-data-lambdas:
