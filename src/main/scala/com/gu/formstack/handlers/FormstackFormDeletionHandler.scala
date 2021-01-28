@@ -8,7 +8,7 @@ import scala.io.Source
 object FormstackFormDeletionHandler extends RequestStreamHandler {
 
   override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
-    val input = Source.fromInputStream(input).mkString
-    println(s"executing updated lambda: $input")
+    val data = Source.fromInputStream(input).mkString
+    println(s"executing updated lambda: $data")
   }
 }
