@@ -29,10 +29,11 @@ Start Docker if not running, then to get started execute:
   This was to mitigate against the (historical) limit of 25 users per Formstack account.
 
 
-- _How do you get credentials to make authenticated Formstack API calls?_
+- _If new credentials are required to make authenticated Formstack API calls, who can these be obtained from?_
 
-  All API calls require an access token; this can be provided by TODO. GET requests for submissions also require 
-the password that is used to encrypt submissions i.e. the encryption password; this can be provided by TODO
+  All API calls require an access token; this can be provided by IT Service Desk. GET requests for submissions also 
+  require the password that is used to encrypt submissions i.e. the encryption password; this can be provided by Central
+  Production.
 
 
 - _There are other Formstack lambdas in the [identity-processes](https://github.com/guardian/identity-processes) repository. 
