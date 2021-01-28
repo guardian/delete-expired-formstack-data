@@ -15,7 +15,7 @@ import java.net.{ URI, URLEncoder }
 import java.nio.charset.StandardCharsets
 import java.time.format.DateTimeFormatter
 import java.time.{ Duration, LocalDateTime, ZoneId, ZonedDateTime }
-import scala.util.{ Failure, Try }
+import scala.util.Try
 
 // Formstack client used to model a subset of the endpoints documented in:
 // https://developers.formstack.com/reference#api-overview
@@ -35,13 +35,13 @@ private[services] class FormstackClient(
     Try(baseGetRequestBuilder(url).build())
   }
 
-//  private def baseDeleteRequestBuilder(url: String): HttpRequest.Builder = {
-//    HttpRequest.newBuilder().uri(URI.create(url)).DELETE().accessToken(accessToken)
-//  }
+  private def baseDeleteRequestBuilder(url: String): HttpRequest.Builder = {
+    HttpRequest.newBuilder().uri(URI.create(url)).DELETE().accessToken(accessToken)
+  }
 
-//  private def baseDeleteRequest(url: String): Try[HttpRequest] = {
-//    Try(baseDeleteRequestBuilder(url).build())
-//  }
+  private def baseDeleteRequest(url: String): Try[HttpRequest] = {
+    Try(baseDeleteRequestBuilder(url).build())
+  }
 
   private def checkStatusCode(request: HttpRequest, response: HttpResponse[String]): Try[Unit] = {
     Either.cond(response.statusCode == 200, (), StatusCodeError(request, response.statusCode, response.body)).toTry
@@ -60,7 +60,7 @@ private[services] class FormstackClient(
   def getForms(page: Int): Try[Forms] = {
     for {
       request <- baseGetRequest(s"https://www.formstack.com/api/v2/form.json?page=$page&per_page=100")
-      _ = logger.debug(s"GET ${request.uri}")
+      _ = logger.debug(s"${request.method} ${request.uri}")
       forms <- sendRequest[Forms](request)
     } yield {
       forms
@@ -68,14 +68,13 @@ private[services] class FormstackClient(
   }
 
   def deleteForm(form: Form): Try[DeleteEntityResponse] = {
-    logger.debug(show"deleting form: $form")
-//    for {
-//      request <- baseDeleteRequest(s"https://www.formstack.com/api/v2/form/${form.id}.json")
-//      response <- sendRequest[DeleteEntityResponse](request)
-//    } yield {
-//      response
-//    }
-    Failure(new RuntimeException("this code shouldn't be reached"))
+    for {
+      request <- baseDeleteRequest(s"https://www.formstack.com/api/v2/form/${form.id}.json")
+      _ = logger.debug(s"${request.method} ${request.uri}")
+      response <- sendRequest[DeleteEntityResponse](request)
+    } yield {
+      response
+    }
   }
 
   def getSubmissions(form: Form, page: Int, maxTime: ZonedDateTime): Try[Submissions] = {
@@ -87,7 +86,7 @@ private[services] class FormstackClient(
           s"https://www.formstack.com/api/v2/form/${form.id}/submission.json?page=$page&per_page=100&max_time=$maxTimeEST"
         ).encryptionPassword(encryptionPassword).build()
       }
-      _ = logger.debug(s"GET ${request.uri}")
+      _ = logger.debug(s"${request.method} ${request.uri}")
       submissions <- sendRequest[Submissions](request)
     } yield {
       submissions
@@ -95,14 +94,13 @@ private[services] class FormstackClient(
   }
 
   def deleteSubmission(submission: Submission): Try[DeleteEntityResponse] = {
-    logger.debug(show"deleting submission: $submission")
-//    for {
-//      request <- baseDeleteRequest(s"https://www.formstack.com/api/v2/submission/${submission.id}.json")
-//      response <- sendRequest[DeleteEntityResponse](request)
-//    } yield {
-//      response
-//    }
-    Failure(new RuntimeException("this code shouldn't be reached"))
+    for {
+      request <- baseDeleteRequest(s"https://www.formstack.com/api/v2/submission/${submission.id}.json")
+      _ = logger.debug(s"${request.method} ${request.uri}")
+      response <- sendRequest[DeleteEntityResponse](request)
+    } yield {
+      response
+    }
   }
 }
 
