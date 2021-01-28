@@ -9,8 +9,6 @@ import scala.util.Try
 
 class FormstackGuardianMetadata extends Logging {
 
-  // TODO: chat with stakeholder so business logic can be documented.
-
   // Some forms are used as templates to create other forms.
   private def isFormATemplate(form: Form): Boolean = {
     form.name.toLowerCase.contains("template")

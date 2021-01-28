@@ -2,7 +2,7 @@
 
 set -e
 
-root_dir="$( cd "$(dirname "$0")" || exit; pwd -P )"
+root_dir="$( cd "$(dirname "$0")/.." || exit; pwd -P )"
 
 function show_help {
 cat << EOF
@@ -20,14 +20,14 @@ Usage: invoke_lambda [OPTIONS] [LAMBDA_NAMES]
   $ ./check_credentials
 
   Build the artifact before executing the lambda
-  $ ./invoke_lambda -b FormstackFormDeletionLambda
+  $ ./invoke_lambda -b FormDeletionLambda
 
   Debug an issue by setting log level to DEBUG and starting a debugger to connect to
   e.g. in IntelliJ you would create a process to attach to a remote JVM on port 5858.
-  $ ./invoke_lambda -l DEBUG -d FormstackFormDeletionLambda
+  $ ./invoke_lambda -l DEBUG -d FormDeletionLambda
 
   Execute a lambda in non-dry mode i.e. DELETE requests will be executed
-  $ ./invoke_lambda -n FormstackSubmissionDeletionLambda
+  $ ./invoke_lambda -n SubmissionDeletionLambda
 
 Options:
   -b       When specified, the lambda artifact is built before invoking the lambda. Requires sbt to use java11.
@@ -113,6 +113,7 @@ if [ -z "${password}" ]; then
 fi
 
 if [ "${build}" = true ]; then
+  source "$root_dir/scripts/java_11_home"
   echo "Building lambda artifact..."
   sbt assembly
 fi
@@ -124,26 +125,20 @@ else
   debugger_option=""
 fi
 
-env_var_file="$(mktemp)"
-cat << EOF >> "$env_var_file"
+event=$(cat << EOF
 {
-  "Parameters": {
-    "IS_DRY_RUN": $dry_run,
-    "LOG_LEVEL": "$log_level"
-  }
+  "formstackAccountId": "$account_id",
+  "formstackAccessToken": "$access_token",
+  "formstackEncryptionPassword": "$password",
+  "isDryRun": $dry_run,
+  "logLevel": "$log_level"
 }
 EOF
+)
 
-code_uri_param='ParameterKey=CodeUri,ParameterValue=target/scala-2.13/delete-expired-formstack-data-assembly-0.1.jar'
-account_id_param="ParameterKey=FormstackAccountId,ParameterValue=$account_id"
-access_token_param="ParameterKey=FormstackAccessToken,ParameterValue=$access_token"
-password_param="ParameterKey=FormstackEncryptionPassword,ParameterValue=$password"
+docker run --mount type=bind,source="$root_dir/template.yaml",target=/usr/local/bin/template.yaml local-code-uri > local-template.yaml
 
-template_file="$(mktemp)"
-docker run --mount type=bind,source="$root_dir/template.yaml",target=/usr/local/bin/template.yaml local-code-uri > "$template_file"
-
-sam local invoke "$lambda_name" \
-  --template-file "$template_file" \
-  --env-vars "$env_var_file" \
-  --parameter-overrides "$code_uri_param $account_id_param $access_token_param $password_param" \
+echo "$event" | sam local invoke "$lambda_name" \
+  --event - \
+  --template-file local-template.yaml \
   $debugger_option

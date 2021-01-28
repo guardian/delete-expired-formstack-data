@@ -5,3 +5,4 @@ project/project
 project/target
 target
 Brewfile.lock.json
+local-template.yaml

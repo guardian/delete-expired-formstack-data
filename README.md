@@ -10,11 +10,14 @@ This is to ensure our use of Formstack is GDPR compliant.
 
 ### Setup
 
+Start Docker if not running, then execute:
 ```
 source ./scripts/setup
 ```
 
 ### Invoking a lambda locally
+
+Start Docker if not running, then to get started execute:
 ```
 ./scripts/invoke_lambda -h
 ```
@@ -48,8 +51,3 @@ Do these make the lambdas in this repo redundant?_
 - _Why does this sit in the Composer account?_
 
   It is related to content creation. 
-
-- _For each entity type (forms, submissions), why is there a lambda per Formstack account instead of one lambda invoked
-with credentials for the different Formstack accounts (respectively)?
-  
-  

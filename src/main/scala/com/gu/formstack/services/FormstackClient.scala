@@ -113,7 +113,7 @@ object FormstackClient extends FormstackJsonConfiguration {
     new FormstackClient(
       httpClient,
       config.formstackAccessToken,
-      config.encryptionPassword
+      config.formstackEncryptionPassword
     )
   }
 

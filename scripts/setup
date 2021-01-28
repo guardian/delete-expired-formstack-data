@@ -2,22 +2,19 @@
 
 set -e
 
+root_dir="$( cd "$(dirname "$0")/.." || exit; pwd -P )"
+
 install_requirements() {
   echo "installing requirements from Brewfile"
   brew bundle
 }
 
 set_java_home() {
-  if ! java_11_home=$(/usr/libexec/java_home -v11); then
-    echo "can't find Java 11 home; is it installed?"
-  fi
-
-  echo "exporting JAVA_HOME variable as $java_11_home"
-  export JAVA_HOME=$java_11_home
+  source "$root_dir/scripts/java_11_home"
 }
 
 build_local_code_uri() {
-  docker build -t local-code-uri scripts/local-code-uri
+  docker build -t local-code-uri "$root_dir/scripts/local-code-uri"
 }
 
 main() {

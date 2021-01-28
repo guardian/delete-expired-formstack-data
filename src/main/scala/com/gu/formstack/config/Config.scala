@@ -1,52 +1,36 @@
 package com.gu.formstack.config
 
-import cats.data.{ Validated, ValidatedNel }
-import cats.implicits._
-import io.circe.generic.JsonCodec
+import io.circe.Codec
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
+import io.circe.parser.decode
 
+import java.io.InputStream
+import scala.io.Source
 import scala.util.Try
 
-// Encoder type class created so config can be easily rendered in log entries
-@JsonCodec case class Config(
+case class Config(
   formstackAccountId: String,
   formstackAccessToken: String,
-  encryptionPassword: String,
-  isDryRun: Boolean,
-  logLevel: String
+  formstackEncryptionPassword: String,
+  isDryRun: Boolean = true,
+  logLevel: String = "INFO"
 ) {
-  def hideSecrets: Config = copy(formstackAccessToken = "*****", encryptionPassword = "*****")
+  def hideSecrets: Config = copy(formstackAccessToken = "*****", formstackEncryptionPassword = "*****")
 }
 
 object Config {
 
-  private trait EnvironmentVariableParser[A] {
-    def parse(name: String): Either[String, A]
-  }
+  implicit val configJsonConfiguration: Configuration = Configuration.default.withDefaults
 
-  private implicit val stringParser: EnvironmentVariableParser[String] = (name: String) => {
-    val value = System.getenv(name)
-    Either.cond(value.nonEmpty, value, s"environment variable $name not set")
-  }
+  // Using semi auto functionality as when using the @ConfiguredJsonCode macro,
+  // couldn't find a way to bring the configJsonConfiguration into scope.
+  implicit val configCodec: Codec[Config] = deriveConfiguredCodec
 
-  private implicit val booleanParser: EnvironmentVariableParser[Boolean] = (name: String) => {
+  def fromInputStream(input: InputStream): Try[Config] = {
     for {
-      raw <- stringParser.parse(name)
-      bool <- Either.catchNonFatal(raw.toBoolean).leftMap(_ => s"environment variable $name is not a valid boolean")
-    } yield bool
-  }
-
-  private def validateEnvironmentVariable[A: EnvironmentVariableParser](name: String): ValidatedNel[String, A] = {
-    val result = implicitly[EnvironmentVariableParser[A]].parse(name)
-    Validated.fromEither(result).toValidatedNel
-  }
-
-  def fromEnvironmentVariables(): Try[Config] = {
-    (
-      validateEnvironmentVariable[String]("FORMSTACK_ACCOUNT_ID"),
-      validateEnvironmentVariable[String]("FORMSTACK_ACCESS_TOKEN"),
-      validateEnvironmentVariable[String]("FORMSTACK_ENCRYPTION_PASSWORD"),
-      validateEnvironmentVariable[Boolean]("IS_DRY_RUN"),
-      validateEnvironmentVariable[String]("LOG_LEVEL")
-    ).mapN(Config.apply).leftMap(errs => new RuntimeException(errs.toList.mkString(" and "))).toEither.toTry
+      data <- Try(Source.fromInputStream(input).mkString)
+      config <- decode[Config](data).toTry
+    } yield config
   }
 }

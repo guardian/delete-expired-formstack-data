@@ -14,7 +14,7 @@
 
 from cfn_tools import load_yaml, dump_yaml
 
-lambda_names = ['FormstackFormDeletionLambda', 'FormstackSubmissionDeletionLambda']
+lambda_names = ['FormDeletionLambda', 'SubmissionDeletionLambda']
 local_artifact_path = "./target/scala-2.13/app.jar"
 
 with open("/usr/local/bin/template.yaml", "r") as stream:

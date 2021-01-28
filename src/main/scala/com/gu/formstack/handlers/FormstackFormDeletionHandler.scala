@@ -12,7 +12,7 @@ object FormstackFormDeletionHandler extends RequestStreamHandler with Logging {
 
   override def handleRequest(input: InputStream, output: OutputStream, context: Context): Unit = {
     (for {
-      config <- Config.fromEnvironmentVariables()
+      config <- Config.fromInputStream(input)
       _ <- Logging.configureLogging(config, context)
       _ = logger.info(show"executing form deletions with config ${config.hideSecrets}")
       formDeleter = FormstackFormDeleter.fromConfig(config)
