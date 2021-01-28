@@ -13,10 +13,6 @@ class FormstackFormDeleter(val service: FormstackService, metadata: FormstackGua
     metadata.isFormExpired(form).getOrElse {
       // If we can't determine whether the form has expired,
       // since expired forms are deleted, err on the side of caution and say it hasn't.
-      //
-      // The log entry will trigger an alarm so any such forms can be reviewed.
-      // WARNING: There is an alarm using a metric filter based on this log entry.
-      // Don't edit it without editing the associated metric filter.
       logger.warn(show"unable to determine if form has expired: $form")
       false
     }
