@@ -63,7 +63,7 @@ Resources:
             Schedule: cron(0 10 * * ? *)
       FunctionName: !Sub formstack-form-deletion-lambda-${Stage}
       Handler: com.gu.formstack.handlers.FormstackFormDeletionHandler::handleRequest
-      MemorySize: 256
+      MemorySize: 512
       Runtime: java11
       Timeout: 900
   SubmissionDeletionLambda:
@@ -111,9 +111,13 @@ Resources:
   FormstackFormDeletionLambdaAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
+      # Don't alarm whilst lambda is getting invoked in dry run mode.
+      ActionsEnabled: False
       AlarmActions:
         - !Ref AlarmTopic
-      AlarmDescription: Alarm if expired forms haven't been successfully deleted for both Formstack accounts.
+      AlarmDescription: >
+        Alarm if expired forms haven't been successfully deleted for both Formstack accounts.
+        Github repo: https://github.com/guardian/delete-expired-formstack-data
       AlarmName: !Sub formstack-form-deletion-alarm-${Stage}
       ComparisonOperator: LessThanThreshold
       EvaluationPeriods: 1
@@ -157,9 +161,12 @@ Resources:
   FormstackSubmissionDeletionLambdaAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
+      ActionsEnabled: False
       AlarmActions:
         - !Ref AlarmTopic
-      AlarmDescription: Alarm if expired submissions haven't been successfully deleted for both Formstack accounts.
+      AlarmDescription: >
+        Alarm if expired submissions haven't been successfully deleted for both Formstack accounts.
+        Github repo: https://github.com/guardian/delete-expired-formstack-data.
       AlarmName: !Sub formstack-submission-deletion-alarm-${Stage}
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
