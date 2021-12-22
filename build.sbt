@@ -1,5 +1,3 @@
-import sbtassembly.AssemblyPlugin.autoImport.assemblyJarName
-
 name := "delete-expired-formstack-data-lambdas"
 
 version := "0.1"
