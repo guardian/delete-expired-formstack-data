@@ -1,3 +1,5 @@
+import sbtassembly.AssemblyPlugin.autoImport.assemblyJarName
+
 name := "delete-expired-formstack-data-lambdas"
 
 version := "0.1"
@@ -32,16 +34,16 @@ scalacOptions ++= Seq(
 
 // Merge strategy to avoid deduplicate strategy being applied to module-info.class,
 // which would cause an error since the content of these files are different for different dependencies.
-assemblyMergeStrategy in assembly := {
+assembly / assemblyMergeStrategy := {
   case PathList("module-info.class") => MergeStrategy.discard
   case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    val oldStrategy = (assembly / assemblyMergeStrategy).value
     oldStrategy(x)
 }
 
 enablePlugins(AssemblyPlugin, RiffRaffArtifact)
 
-assemblyJarName in assembly := s"app.jar"
+assembly / assemblyJarName := s"app.jar"
 
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Some("riffraff-artifact")
