@@ -33,7 +33,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri:
-        Bucket: delete-expired-formstack-data-dist
+        Bucket: composer-dist
         Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack forms
       Events:
@@ -70,7 +70,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri:
-        Bucket: delete-expired-formstack-data-dist
+        Bucket: composer-dist
         Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack submissions
       # We want to invoke the lambda(s) for deleting forms submissions after the lambda(s) for deleting forms,
