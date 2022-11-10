@@ -7,6 +7,9 @@ Parameters:
     Type: String
     AllowedValues:
       - PROD # only PROD currently supported since there isn't a CODE Formstack environment
+  DistributionBucket:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /account/services/artifact.bucket
   FormstackAccountIdAccount1:
     Description: Id of the first Formstack account.
     Type: String
@@ -33,7 +36,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri:
-        Bucket: composer-dist
+        Bucket: !Ref DistributionBucket
         Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack forms
       Events:
@@ -70,7 +73,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri:
-        Bucket: composer-dist
+        Bucket: !Ref DistributionBucket
         Key: !Sub ${Stage}/delete-expired-formstack-data-lambdas/app.jar
       Description: Lambda to delete old Formstack submissions
       # We want to invoke the lambda(s) for deleting forms submissions after the lambda(s) for deleting forms,
