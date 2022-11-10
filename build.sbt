@@ -2,7 +2,7 @@ name := "delete-expired-formstack-data-lambdas"
 
 version := "0.1"
 
-scalaVersion := "2.13.4"
+scalaVersion := "2.13.10"
 
 val circeVersion = "0.13.0"
 

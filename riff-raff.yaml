@@ -14,7 +14,7 @@ deployments:
   delete-expired-formstack-data-lambdas:
     type: aws-lambda
     parameters:
-      bucket: delete-expired-formstack-data-dist
+      bucketSsmLookup: true
       fileName: app.jar
       functionNames:
         - formstack-form-deletion-lambda-
