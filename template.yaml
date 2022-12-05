@@ -12,25 +12,32 @@ Parameters:
     Default: /account/services/artifact.bucket
   FormstackAccountIdAccount1:
     Description: Id of the first Formstack account.
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /PROD/formstack/delete-expired-formstack-data/FormstackAccountIdAccount1
   FormstackAccessTokenAccount1:
     Description: Used to authenticate against the Formstack API for account one.
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /PROD/formstack/delete-expired-formstack-data/FormstackAccessTokenAccount1
   FormstackEncryptionPasswordAccount1:
     Description: Used to decrypt Formstack submissions for account 1.
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /PROD/formstack/delete-expired-formstack-data/FormstackEncryptionPasswordAccount1
   FormstackAccountIdAccount2:
     Description: Id of the second Formstack account.
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /PROD/formstack/delete-expired-formstack-data/FormstackAccountIdAccount2
   FormstackAccessTokenAccount2:
     Description: Used to authenticate against the Formstack API for account 2.
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /PROD/formstack/delete-expired-formstack-data/FormstackAccessTokenAccount2
   FormstackEncryptionPasswordAccount2:
     Description: Used to decrypt Formstack submissions for account 2.
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /PROD/formstack/delete-expired-formstack-data/FormstackEncryptionPasswordAccount2
   AlarmTopic:
     Description: ARN of SNS topic to send messages to when a Formstack alarm transitions to the Alarm state.
     Type: String
+    Default: /PROD/formstack/delete-expired-formstack-data/AlarmTopic
 Resources:
   FormDeletionLambda:
     Type: AWS::Serverless::Function
