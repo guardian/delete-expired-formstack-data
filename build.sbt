@@ -39,12 +39,8 @@ assembly / assemblyMergeStrategy := {
     oldStrategy(x)
 }
 
-enablePlugins(AssemblyPlugin, RiffRaffArtifact)
+enablePlugins(AssemblyPlugin)
 
 assembly / assemblyJarName := s"app.jar"
 
-riffRaffPackageType := assembly.value
-riffRaffUploadArtifactBucket := Some("riffraff-artifact")
-riffRaffUploadManifestBucket := Some("riffraff-builds")
-riffRaffManifestProjectName := s"Content Platforms::${name.value}"
-riffRaffArtifactResources += baseDirectory.value / "template.yaml" -> "cloudformation/template.yaml"
+Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-u", sys.env.getOrElse("SBT_JUNIT_OUTPUT", "junit"))
