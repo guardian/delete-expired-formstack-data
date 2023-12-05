@@ -1,3 +1,5 @@
+**NB: archived until there's a consensus on the definition of 'expired' in PROD.**
+
 # Delete expired Formstack data
 
 This repo provides lambdas which are used for (respectively):
