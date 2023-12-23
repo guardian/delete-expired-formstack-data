@@ -17,6 +17,11 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "2.1.0"
 )
 
+dependencyOverrides ++= Seq(
+  "ch.qos.logback" % "logback-classic" % "1.4.12",
+  "ch.qos.logback" % "logback-core" % "1.4.12",
+)
+
 // Mostly cherry picked from https://tpolecat.github.io/2017/04/25/scalac-flags.html
 scalacOptions ++= Seq(
   "-Xfatal-warnings", // Fail the compilation if there are any warnings.
